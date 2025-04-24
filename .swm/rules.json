@@ -43,16 +43,16 @@
             }
         },
         "211a0b28-9cba-490a-90bd-ea4e6edca6fe": {
-            "name": "Invoking Backend Calls Guide  \n",
+            "name": "service_login is disabled",
             "rule": {
                 "type": "regex",
-                "regex": "\\bbackend\\s*=\\s*Invoke\\(",
+                "regex": "\\bservice_login",
                 "ignoreCase": true
             },
             "actions": {
                 "ide": {
                     "doc_id": "w5y5gd9e",
-                    "message": "When a dev is invoking backend calls, I want them to find this document because of its detailed explanation of the Invoke method and its usage."
+                    "message": "caution! service_login is disabled."
                 }
             }
         },
