@@ -69,7 +69,9 @@ type RecvControl interface {
 func (s *stream) Send(ctx context.Context, m interface{}) (err error) {
 	defer func() {
 		if err != nil {
-			s.opts.StreamTransport.Close(ctx)
+			if closeErr := s.opts.StreamTransport.Close(ctx); closeErr != nil {
+				log.Printf("Failed to close stream transport: %v", closeErr)
+			}
 		}
 	}()
 
@@ -137,8 +139,19 @@ func (s *stream) Recv(ctx context.Context) (buf []byte, err error) {
 
 // Close implements Stream.
 func (s *stream) Close(ctx context.Context) error {
-	// Send Close message.
-	return s.Send(ctx, nil)
+	// 使用sync.Once确保关闭操作只执行一次
+	var once sync.Once
+	var err error
+	once.Do(func() {
+		if !s.closed {
+			s.closed = true
+			if closeErr := s.opts.StreamTransport.Close(ctx); closeErr != nil {
+				log.Printf("Failed to close stream transport: %v", closeErr)
+				err = closeErr
+			}
+		}
+	})
+	return err
 }
 
 // Init implements Stream.
@@ -165,10 +178,10 @@ func (s *stream) Init(ctx context.Context, opt ...Option) (*Options, error) {
 	ensureMsgRemoteAddr(msg, findFirstNonEmpty(node.Network, opts.Network), node.Address, node.ParseAddr)
 	const invalidCost = -1
 	opts.Node.set(node, node.Address, invalidCost)
-	if opts.Codec == nil {
-		report.ClientCodecEmpty.Incr()
-		return nil, errs.NewFrameError(errs.RetClientEncodeFail, "client: codec empty")
-	}
+		if opts.Codec == nil {
+			report.ClientCodecEmpty.Incr()
+			return nil, errs.NewFrameError(errs.RetClientCodecEmpty, "client: codec empty")
+		}
 	opts.CallOptions = append(opts.CallOptions, transport.WithMsg(msg))
 	s.opts = opts
 	return s.opts, nil
