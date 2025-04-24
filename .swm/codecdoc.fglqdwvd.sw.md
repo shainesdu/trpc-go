@@ -8,8 +8,8 @@ This document will walk you through the implementation of the codec package in t
 We will cover:
 
 1. The purpose and structure of the codec package.
-2. The definition and role of <SwmToken path="/codec/codec.go" pos="24:2:2" line-data="// RequestType is the type of client request, such as SendAndRecv，SendOnly.">`RequestType`</SwmToken>.
-3. The <SwmToken path="/codec/codec.go" pos="34:2:2" line-data="// Codec defines the interface of business communication protocol,">`Codec`</SwmToken> interface and its methods.
+2. The definition and role of <SwmToken path="/codec/codec.go" pos="26:2:2" line-data="// RequestType is the type of client request, such as SendAndRecv，SendOnly.">`RequestType`</SwmToken>.
+3. The <SwmToken path="/codec/codec.go" pos="36:2:2" line-data="// Codec defines the interface of business communication protocol,">`Codec`</SwmToken> interface and its methods.
 4. The registration and retrieval of codecs.
 
 # Codec package overview
@@ -26,6 +26,8 @@ The codec package is designed to handle the packing and unpacking of messages in
 package codec
 
 import (
+	"errors"
+	"fmt"
 	"sync"
 
 	trpcpb "trpc.group/trpc/trpc-protocol/pb/go/trpc"
@@ -36,13 +38,13 @@ import (
 
 </SwmSnippet>
 
-# <SwmToken path="/codec/codec.go" pos="24:2:2" line-data="// RequestType is the type of client request, such as SendAndRecv，SendOnly.">`RequestType`</SwmToken> definition
+# <SwmToken path="/codec/codec.go" pos="26:2:2" line-data="// RequestType is the type of client request, such as SendAndRecv，SendOnly.">`RequestType`</SwmToken> definition
 
-<SwmSnippet path="/codec/codec.go" line="24">
+<SwmSnippet path="/codec/codec.go" line="26">
 
 ---
 
-The <SwmToken path="/codec/codec.go" pos="24:2:2" line-data="// RequestType is the type of client request, such as SendAndRecv，SendOnly.">`RequestType`</SwmToken> is an enumeration that defines the type of client requests. It distinguishes between requests that expect a response and those that do not.
+The <SwmToken path="/codec/codec.go" pos="26:2:2" line-data="// RequestType is the type of client request, such as SendAndRecv，SendOnly.">`RequestType`</SwmToken> is an enumeration that defines the type of client requests. It distinguishes between requests that expect a response and those that do not.
 
 ```
 // RequestType is the type of client request, such as SendAndRecv，SendOnly.
@@ -62,11 +64,11 @@ const (
 
 # Codec interface
 
-<SwmSnippet path="/codec/codec.go" line="34">
+<SwmSnippet path="/codec/codec.go" line="36">
 
 ---
 
-The <SwmToken path="/codec/codec.go" pos="34:2:2" line-data="// Codec defines the interface of business communication protocol,">`Codec`</SwmToken> interface is central to the package. It defines methods for encoding and decoding message bodies. The <SwmToken path="/codec/codec.go" pos="40:3:3" line-data="	// Encode pack the body into binary buffer.">`Encode`</SwmToken> method packs the body into a binary buffer, while the <SwmToken path="/codec/codec.go" pos="45:3:3" line-data="	// Decode unpack the body from binary buffer">`Decode`</SwmToken> method unpacks the body from a binary buffer. This separation of concerns allows for clear handling of message serialization and deserialization.
+The <SwmToken path="/codec/codec.go" pos="36:2:2" line-data="// Codec defines the interface of business communication protocol,">`Codec`</SwmToken> interface is central to the package. It defines methods for encoding and decoding message bodies. The <SwmToken path="/codec/codec.go" pos="42:3:3" line-data="	// Encode pack the body into binary buffer.">`Encode`</SwmToken> method packs the body into a binary buffer, while the <SwmToken path="/codec/codec.go" pos="47:3:3" line-data="	// Decode unpack the body from binary buffer">`Decode`</SwmToken> method unpacks the body from a binary buffer. This separation of concerns allows for clear handling of message serialization and deserialization.
 
 ```
 // Codec defines the interface of business communication protocol,
@@ -85,11 +87,11 @@ type Codec interface {
 
 </SwmSnippet>
 
-<SwmSnippet path="/codec/codec.go" line="45">
+<SwmSnippet path="/codec/codec.go" line="47">
 
 ---
 
-The <SwmToken path="/codec/codec.go" pos="45:3:3" line-data="	// Decode unpack the body from binary buffer">`Decode`</SwmToken> method complements <SwmToken path="/codec/codec.go" pos="40:3:3" line-data="	// Encode pack the body into binary buffer.">`Encode`</SwmToken> by providing the logic to unpack the binary buffer back into a message body.
+The <SwmToken path="/codec/codec.go" pos="47:3:3" line-data="	// Decode unpack the body from binary buffer">`Decode`</SwmToken> method complements <SwmToken path="/codec/codec.go" pos="42:3:3" line-data="	// Encode pack the body into binary buffer.">`Encode`</SwmToken> by providing the logic to unpack the binary buffer back into a message body.
 
 ```
 	// Decode unpack the body from binary buffer
@@ -107,11 +109,11 @@ The <SwmToken path="/codec/codec.go" pos="45:3:3" line-data="	// Decode unpack t
 
 The package maintains maps for client and server codecs, allowing for the registration and retrieval of codecs by name. This is crucial for supporting different communication protocols within the same application.
 
-<SwmSnippet path="/codec/codec.go" line="51">
+<SwmSnippet path="/codec/codec.go" line="53">
 
 ---
 
-The <SwmToken path="/codec/codec.go" pos="57:2:2" line-data="// Register defines the logic of register a codec by name. It will be">`Register`</SwmToken> function is responsible for adding codecs to the maps. It uses a lock to ensure thread safety during the registration process.
+The <SwmToken path="/codec/codec.go" pos="63:2:2" line-data="// Register defines the logic of register a codec by name. It will be">`Register`</SwmToken> function is responsible for adding codecs to the maps. It uses a lock to ensure thread safety during the registration process.
 
 ```
 var (
@@ -120,42 +122,73 @@ var (
 	lock         sync.RWMutex
 )
 
+var ErrCodecAlreadyRegistered = errors.New("codec already registered")
+
+var ErrCodecNotFound = errors.New("codec not found")
+
 // Register defines the logic of register a codec by name. It will be
 // called by init function defined by third package. If there is no server codec,
 // the second param serverCodec can be nil.
-func Register(name string, serverCodec Codec, clientCodec Codec) {
+func Register(name string, serverCodec Codec, clientCodec Codec) error {
 	lock.Lock()
+	defer lock.Unlock()
+	
+	if _, serverExists := serverCodecs[name]; serverExists {
+		return fmt.Errorf("%w: server codec with name '%s'", ErrCodecAlreadyRegistered, name)
+	}
+	if _, clientExists := clientCodecs[name]; clientExists {
+		return fmt.Errorf("%w: client codec with name '%s'", ErrCodecAlreadyRegistered, name)
+	}
+	
 	serverCodecs[name] = serverCodec
 	clientCodecs[name] = clientCodec
-	lock.Unlock()
+	return nil
 }
+
+// GetServer returns the server codec by name.
+func GetServer(name string) (Codec, error) {
+	lock.RLock()
+	c, exists := serverCodecs[name]
+	lock.RUnlock()
+	
+	if !exists {
+		return nil, fmt.Errorf("%w: server codec with name '%s'", ErrCodecNotFound, name)
+	}
 ```
 
 ---
 
 </SwmSnippet>
 
-<SwmSnippet path="/codec/codec.go" line="67">
+<SwmSnippet path="/codec/codec.go" line="82">
 
 ---
 
-The <SwmToken path="/codec/codec.go" pos="67:2:2" line-data="// GetServer returns the server codec by name.">`GetServer`</SwmToken> and <SwmToken path="/codec/codec.go" pos="75:2:2" line-data="// GetClient returns the client codec by name.">`GetClient`</SwmToken> functions provide access to the registered server and client codecs, respectively. They use read locks to ensure safe concurrent access.
+The <SwmToken path="/codec/codec.go" pos="82:2:2" line-data="// GetServer returns the server codec by name.">`GetServer`</SwmToken> and <SwmToken path="/codec/codec.go" pos="94:2:2" line-data="// GetClient returns the client codec by name.">`GetClient`</SwmToken> functions provide access to the registered server and client codecs, respectively. They use read locks to ensure safe concurrent access.
 
 ```
 // GetServer returns the server codec by name.
-func GetServer(name string) Codec {
+func GetServer(name string) (Codec, error) {
 	lock.RLock()
-	c := serverCodecs[name]
+	c, exists := serverCodecs[name]
 	lock.RUnlock()
-	return c
+	
+	if !exists {
+		return nil, fmt.Errorf("%w: server codec with name '%s'", ErrCodecNotFound, name)
+	}
+	return c, nil
 }
 
 // GetClient returns the client codec by name.
-func GetClient(name string) Codec {
+func GetClient(name string) (Codec, error) {
 	lock.RLock()
-	c := clientCodecs[name]
+	c, exists := clientCodecs[name]
 	lock.RUnlock()
-	return c
+	
+	if !exists {
+		return nil, fmt.Errorf("%w: client codec with name '%s'", ErrCodecNotFound, name)
+	}
+	return c, nil
 }
 ```
 
