@@ -2,7 +2,7 @@
 //
 // Tencent is pleased to support the open source community by making tRPC available.
 //
-// Copyright (C) 2023 THL A29 Limited, a Tencent company.
+// Copyright (C) 2023 Tencent.
 // All rights reserved.
 //
 // If you have downloaded a copy of the tRPC source code from Tencent,
@@ -16,8 +16,6 @@
 package codec
 
 import (
-	"errors"
-	"fmt"
 	"sync"
 
 	trpcpb "trpc.group/trpc/trpc-protocol/pb/go/trpc"
@@ -56,66 +54,28 @@ var (
 	lock         sync.RWMutex
 )
 
-var ErrCodecAlreadyRegistered = errors.New("codec already registered")
-
-var ErrCodecNotFound = errors.New("codec not found")
-
 // Register defines the logic of register a codec by name. It will be
 // called by init function defined by third package. If there is no server codec,
 // the second param serverCodec can be nil.
-func Register(name string, serverCodec Codec, clientCodec Codec) error {
+func Register(name string, serverCodec Codec, clientCodec Codec) {
 	lock.Lock()
-	defer lock.Unlock()
-	
-	if _, serverExists := serverCodecs[name]; serverExists {
-		return fmt.Errorf("%w: server codec with name '%s'", ErrCodecAlreadyRegistered, name)
-	}
-	if _, clientExists := clientCodecs[name]; clientExists {
-		return fmt.Errorf("%w: client codec with name '%s'", ErrCodecAlreadyRegistered, name)
-	}
-	
 	serverCodecs[name] = serverCodec
 	clientCodecs[name] = clientCodec
-	return nil
+	lock.Unlock()
 }
 
 // GetServer returns the server codec by name.
-func GetServer(name string) (Codec, error) {
+func GetServer(name string) Codec {
 	lock.RLock()
-	c, exists := serverCodecs[name]
+	c := serverCodecs[name]
 	lock.RUnlock()
-	
-	if !exists {
-		return nil, fmt.Errorf("%w: server codec with name '%s'", ErrCodecNotFound, name)
-	}
-	return c, nil
-}
-
-// GetClient returns the client codec by name.
-func GetClient(name string) (Codec, error) {
-	lock.RLock()
-	c, exists := clientCodecs[name]
-	lock.RUnlock()
-	
-	if !exists {
-		return nil, fmt.Errorf("%w: client codec with name '%s'", ErrCodecNotFound, name)
-	}
-	return c, nil
-}
-
-// RegisterCompatible is a backward compatible version of Register that ignores errors.
-func RegisterCompatible(name string, serverCodec Codec, clientCodec Codec) {
-	_ = Register(name, serverCodec, clientCodec)
-}
-
-// GetServerCompatible is a backward compatible version of GetServer that ignores errors.
-func GetServerCompatible(name string) Codec {
-	c, _ := GetServer(name)
 	return c
 }
 
-// GetClientCompatible is a backward compatible version of GetClient that ignores errors.
-func GetClientCompatible(name string) Codec {
-	c, _ := GetClient(name)
+// GetClient returns the client codec by name.
+func GetClient(name string) Codec {
+	lock.RLock()
+	c := clientCodecs[name]
+	lock.RUnlock()
 	return c
 }

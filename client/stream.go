@@ -2,7 +2,7 @@
 //
 // Tencent is pleased to support the open source community by making tRPC available.
 //
-// Copyright (C) 2023 THL A29 Limited, a Tencent company.
+// Copyright (C) 2023 Tencent.
 // All rights reserved.
 //
 // If you have downloaded a copy of the tRPC source code from Tencent,
@@ -69,9 +69,7 @@ type RecvControl interface {
 func (s *stream) Send(ctx context.Context, m interface{}) (err error) {
 	defer func() {
 		if err != nil {
-			if closeErr := s.opts.StreamTransport.Close(ctx); closeErr != nil {
-				log.Printf("Failed to close stream transport: %v", closeErr)
-			}
+			s.opts.StreamTransport.Close(ctx)
 		}
 	}()
 
@@ -139,19 +137,8 @@ func (s *stream) Recv(ctx context.Context) (buf []byte, err error) {
 
 // Close implements Stream.
 func (s *stream) Close(ctx context.Context) error {
-	// 使用sync.Once确保关闭操作只执行一次
-	var once sync.Once
-	var err error
-	once.Do(func() {
-		if !s.closed {
-			s.closed = true
-			if closeErr := s.opts.StreamTransport.Close(ctx); closeErr != nil {
-				log.Printf("Failed to close stream transport: %v", closeErr)
-				err = closeErr
-			}
-		}
-	})
-	return err
+	// Send Close message.
+	return s.Send(ctx, nil)
 }
 
 // Init implements Stream.
@@ -178,10 +165,10 @@ func (s *stream) Init(ctx context.Context, opt ...Option) (*Options, error) {
 	ensureMsgRemoteAddr(msg, findFirstNonEmpty(node.Network, opts.Network), node.Address, node.ParseAddr)
 	const invalidCost = -1
 	opts.Node.set(node, node.Address, invalidCost)
-		if opts.Codec == nil {
-			report.ClientCodecEmpty.Incr()
-			return nil, errs.NewFrameError(errs.RetClientCodecEmpty, "client: codec empty")
-		}
+	if opts.Codec == nil {
+		report.ClientCodecEmpty.Incr()
+		return nil, errs.NewFrameError(errs.RetClientEncodeFail, "client: codec empty")
+	}
 	opts.CallOptions = append(opts.CallOptions, transport.WithMsg(msg))
 	s.opts = opts
 	return s.opts, nil

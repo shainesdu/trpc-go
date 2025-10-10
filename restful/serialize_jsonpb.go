@@ -2,7 +2,7 @@
 //
 // Tencent is pleased to support the open source community by making tRPC available.
 //
-// Copyright (C) 2023 THL A29 Limited, a Tencent company.
+// Copyright (C) 2023 Tencent.
 // All rights reserved.
 //
 // If you have downloaded a copy of the tRPC source code from Tencent,
@@ -91,7 +91,7 @@ var typeOfProtoMessage = reflect.TypeOf((*proto.Message)(nil)).Elem()
 // marshalNonProtoField marshals none proto fields.
 // Go's standard json lib or github.com/json-iterator/go doesn't support marshaling
 // of some types of protobuf message, therefore reflection is needed to support it.
-// TODO: performance optimization for marshalNonProtoField to reduce reflection usage.
+// TODO: performance optimization.
 func marshalNonProtoField(v interface{}) ([]byte, error) {
 	if v == nil {
 		return []byte("null"), nil
