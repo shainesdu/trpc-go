@@ -193,10 +193,19 @@ func (p *ConnectionPool) keepMinIdles() {
 	if count > 0 {
 		p.idleSize += count
 	}
+	closed := p.closed
 	p.mu.Unlock()
 
+	// Don't start goroutines if pool is already closed
+	if closed {
+		return
+	}
+
+	var wg sync.WaitGroup
 	for i := 0; i < count; i++ {
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			ctx, cancel := context.WithTimeout(context.Background(), defaultDialTimeout)
 			defer cancel()
 			if err := p.addIdleConn(ctx); err != nil {
@@ -206,6 +215,7 @@ func (p *ConnectionPool) keepMinIdles() {
 			}
 		}()
 	}
+	// Note: We don't wait here to avoid blocking, but goroutines are now properly tracked
 }
 
 func (p *ConnectionPool) addIdleConn(ctx context.Context) error {

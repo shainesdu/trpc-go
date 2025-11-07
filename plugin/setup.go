@@ -16,6 +16,7 @@
 package plugin
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -209,22 +210,29 @@ func (p *pluginInfo) checkDependence(status map[string]bool, dependences []strin
 // setup initializes a single plugin.
 func (p *pluginInfo) setup() error {
 	var (
-		ch  = make(chan struct{})
-		err error
+		ch = make(chan error, 1) // Buffered channel to prevent goroutine leak on timeout
 	)
+	ctx, cancel := context.WithTimeout(context.Background(), SetupTimeout)
+	defer cancel()
+
 	go func() {
-		err = p.factory.Setup(p.name, &YamlNodeDecoder{Node: &p.cfg})
-		close(ch)
+		err := p.factory.Setup(p.name, &YamlNodeDecoder{Node: &p.cfg})
+		select {
+		case ch <- err:
+		case <-ctx.Done():
+			// Context cancelled, don't block on channel send
+		}
 	}()
+
 	select {
-	case <-ch:
-	case <-time.After(SetupTimeout):
+	case err := <-ch:
+		if err != nil {
+			return fmt.Errorf("setup plugin %s error: %v", p.key(), err)
+		}
+		return nil
+	case <-ctx.Done():
 		return fmt.Errorf("setup plugin %s timeout", p.key())
 	}
-	if err != nil {
-		return fmt.Errorf("setup plugin %s error: %v", p.key(), err)
-	}
-	return nil
 }
 
 // YamlNodeDecoder is a decoder for a yaml.Node of the yaml config file.

@@ -160,8 +160,13 @@ func (st *RESTServerTransport) ListenAndServe(ctx context.Context, opt ...transp
 	}
 
 	go func() {
-		<-opts.StopListening
-		ln.Close()
+		select {
+		case <-opts.StopListening:
+			ln.Close()
+		case <-ctx.Done():
+			// Ensure goroutine exits when context is cancelled
+			ln.Close()
+		}
 	}()
 
 	return st.serve(ctx, ln, opts)
@@ -190,8 +195,10 @@ func (st *RESTServerTransport) serve(
 		}()
 		if st.opts.ReusePort {
 			go func() {
-				<-ctx.Done()
-				_ = server.Shutdown()
+				select {
+				case <-ctx.Done():
+					_ = server.Shutdown()
+				}
 			}()
 		}
 		return nil
@@ -203,8 +210,13 @@ func (st *RESTServerTransport) serve(
 	}()
 	if st.opts.ReusePort {
 		go func() {
-			<-ctx.Done()
-			_ = server.Shutdown(context.TODO())
+			select {
+			case <-ctx.Done():
+				// Use a timeout context for graceful shutdown to prevent goroutine leak
+				shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				_ = server.Shutdown(shutdownCtx)
+			}
 		}()
 	}
 	return nil

@@ -194,13 +194,23 @@ func (t *ServerTransport) serve(ctx context.Context, s *stdhttp.Server, opts *tr
 	// Reuse ports: Kernel distributes IO ReadReady events to multiple cores and threads to accelerate IO efficiency.
 	if t.reusePort {
 		go func() {
-			<-ctx.Done()
-			_ = s.Shutdown(context.TODO())
+			select {
+			case <-ctx.Done():
+				// Use a timeout context for graceful shutdown to prevent goroutine leak
+				shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				_ = s.Shutdown(shutdownCtx)
+			}
 		}()
 	}
 	go func() {
-		<-opts.StopListening
-		ln.Close()
+		select {
+		case <-opts.StopListening:
+			ln.Close()
+		case <-ctx.Done():
+			// Ensure goroutine exits when context is cancelled
+			ln.Close()
+		}
 	}()
 	return nil
 }
