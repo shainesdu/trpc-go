@@ -1,0 +1,293 @@
+{
+  "repo_notes": [
+    {
+      "content": ""
+    }
+  ],
+  "pages": [
+    {
+      "title": "Overview",
+      "purpose": "Introduce tRPC-Go framework, its purpose as a pluggable RPC framework, and high-level architectural concepts",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Features and Capabilities",
+      "purpose": "Detail tRPC-Go's key features including multi-protocol support, streaming, plugins, and extensibility",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Architecture and Design Principles",
+      "purpose": "Explain the layered architecture, plugin system, and core design principles like modularity and interface-based programming",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Getting Started",
+      "purpose": "Guide users through initial setup and creating their first tRPC-Go service",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Installation and Dependencies",
+      "purpose": "Cover Go module setup, dependency management, and required tools like trpc-cmdline",
+      "parent": "Getting Started",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Quick Start Tutorial",
+      "purpose": "Walk through creating a simple service from Protocol Buffer definition to running server",
+      "parent": "Getting Started",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Understanding Generated Code",
+      "purpose": "Explain the code generation process, stub files, and how to implement service handlers",
+      "parent": "Getting Started",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Server Development",
+      "purpose": "Comprehensive guide to developing server-side services with tRPC-Go",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Service Types and Protocols",
+      "purpose": "Explain different service models: tRPC RPC, streaming, HTTP standard, RESTful, scheduled tasks, and consumers",
+      "parent": "Server Development",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Server Configuration",
+      "purpose": "Detail trpc_go.yaml server section, service configuration, and trpc.NewServer initialization",
+      "parent": "Server Development",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Service Registration and Naming",
+      "purpose": "Explain naming services, proto services, multi-service registration, and service discovery",
+      "parent": "Server Development",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "RESTful API Development",
+      "purpose": "Cover trpc.api.http annotations, HTTP rule mappings, transcoding, and customization points",
+      "parent": "Server Development",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Streaming Services",
+      "purpose": "Guide for implementing server-side, client-side, and bidirectional streaming RPCs",
+      "parent": "Server Development",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Client Development",
+      "purpose": "Guide to developing client applications that consume tRPC-Go services",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Client Interface and Proxies",
+      "purpose": "Explain client.Client interface, proxy generation, and making RPC calls",
+      "parent": "Client Development",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Connection Management",
+      "purpose": "Detail connection modes: short connection, connection pool, and multiplexing",
+      "parent": "Client Development",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Request Configuration and Options",
+      "purpose": "Cover client.Option functions, timeout configuration, metadata, and service discovery integration",
+      "parent": "Client Development",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Error Handling",
+      "purpose": "Explain error codes, timeout handling, context cancellation, and error reporting",
+      "parent": "Client Development",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Protocol and Codec System",
+      "purpose": "Deep dive into protocol encoding/decoding and the codec abstraction layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Codec Architecture",
+      "purpose": "Explain codec.Codec interface, codec registration, and the abstraction layer",
+      "parent": "Protocol and Codec System",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "tRPC Binary Protocol",
+      "purpose": "Detail frame structure, RequestProtocol/ResponseProtocol, magic numbers, and version handling",
+      "parent": "Protocol and Codec System",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "HTTP/RESTful Protocol",
+      "purpose": "Explain HTTP codec, header mapping, error handling, and RESTful transcoding",
+      "parent": "Protocol and Codec System",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Streaming Protocol",
+      "purpose": "Cover stream frame types (INIT, DATA, CLOSE, FEEDBACK) and streaming metadata",
+      "parent": "Protocol and Codec System",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Message Context (codec.Msg)",
+      "purpose": "Explain codec.Msg lifecycle, pooling, cloning, and service name parsing",
+      "parent": "Protocol and Codec System",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Serialization and Compression",
+      "purpose": "Detail serialization types (Protocol Buffers, JSON, Flatbuffers) and compression options",
+      "parent": "Protocol and Codec System",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Frame Headers and Structure",
+      "purpose": "Technical details of FrameHead binary layout, validation, and versioning",
+      "parent": "Protocol and Codec System",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Transport Layer",
+      "purpose": "Explain the transport abstraction and different transport implementations",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Transport Abstraction",
+      "purpose": "Explain transport.ClientTransport and transport.ServerTransport interfaces and registration",
+      "parent": "Transport Layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "HTTP Transport",
+      "purpose": "Detail HTTP server/client transport, TLS configuration, and net/http vs fasthttp",
+      "parent": "Transport Layer",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    }
+  ]
+}
