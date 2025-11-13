@@ -259,7 +259,12 @@ func WithTransport(t transport.ServerTransport) Option {
 func WithProtocol(s string) Option {
 	return func(o *Options) {
 		o.protocol = s
-		o.Codec = codec.GetServer(s)
+		c, err := codec.GetServer(s)
+		if err != nil {
+			o.Codec = nil
+		} else {
+			o.Codec = c
+		}
 		fb := transport.GetFramerBuilder(s)
 		if fb != nil {
 			o.ServeOptions = append(o.ServeOptions, transport.WithServerFramerBuilder(fb))

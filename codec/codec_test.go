@@ -41,19 +41,88 @@ func (c *Fake) Decode(message codec.Msg, inbuf []byte) (outbody []byte, err erro
 func TestCodec(t *testing.T) {
 	f := &Fake{}
 
-	codec.Register("fake", f, f)
+	err := codec.Register("fake", f, f)
+	assert.NoError(t, err)
 
-	serverCodec := codec.GetServer("NoExists")
+	serverCodec, err := codec.GetServer("NoExists")
+	assert.Error(t, err)
 	assert.Nil(t, serverCodec)
 
-	clientCodec := codec.GetClient("NoExists")
+	clientCodec, err := codec.GetClient("NoExists")
+	assert.Error(t, err)
 	assert.Nil(t, clientCodec)
 
-	serverCodec = codec.GetServer("fake")
+	serverCodec, err = codec.GetServer("fake")
+	assert.NoError(t, err)
 	assert.Equal(t, f, serverCodec)
 
-	clientCodec = codec.GetClient("fake")
+	clientCodec, err = codec.GetClient("fake")
+	assert.NoError(t, err)
 	assert.Equal(t, f, clientCodec)
+}
+
+func TestRegisterWithValidation(t *testing.T) {
+	f := &Fake{}
+
+	t.Run("successful registration", func(t *testing.T) {
+		err := codec.RegisterWithValidation("test-codec-1", f, f)
+		assert.NoError(t, err)
+	})
+
+	t.Run("duplicate registration error", func(t *testing.T) {
+		err := codec.RegisterWithValidation("test-codec-2", f, f)
+		assert.NoError(t, err)
+		
+		err = codec.RegisterWithValidation("test-codec-2", f, f)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "already registered")
+	})
+
+	t.Run("empty codec name error", func(t *testing.T) {
+		err := codec.RegisterWithValidation("", f, f)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "cannot be empty")
+	})
+}
+
+func TestGetServerWithError(t *testing.T) {
+	f := &Fake{}
+
+	t.Run("get non-existent codec", func(t *testing.T) {
+		c, err := codec.GetServerWithError("non-existent-codec")
+		assert.Error(t, err)
+		assert.Nil(t, c)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("get existing codec", func(t *testing.T) {
+		err := codec.Register("test-server-codec", f, f)
+		assert.NoError(t, err)
+		
+		c, err := codec.GetServerWithError("test-server-codec")
+		assert.NoError(t, err)
+		assert.Equal(t, f, c)
+	})
+}
+
+func TestGetClientWithError(t *testing.T) {
+	f := &Fake{}
+
+	t.Run("get non-existent codec", func(t *testing.T) {
+		c, err := codec.GetClientWithError("non-existent-client-codec")
+		assert.Error(t, err)
+		assert.Nil(t, c)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("get existing codec", func(t *testing.T) {
+		err := codec.Register("test-client-codec", f, f)
+		assert.NoError(t, err)
+		
+		c, err := codec.GetClientWithError("test-client-codec")
+		assert.NoError(t, err)
+		assert.Equal(t, f, c)
+	})
 }
 
 // GOMAXPROCS=1 go test -bench=WithNewMessage -benchmem -benchtime=10s

@@ -371,7 +371,12 @@ func WithProtocol(s string) Option {
 			return
 		}
 		o.Protocol = s
-		o.Codec = codec.GetClient(s)
+		c, err := codec.GetClient(s)
+		if err != nil {
+			o.Codec = nil
+		} else {
+			o.Codec = c
+		}
 		if b := transport.GetFramerBuilder(s); b != nil {
 			o.CallOptions = append(o.CallOptions,
 				transport.WithClientFramerBuilder(b),

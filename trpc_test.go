@@ -64,8 +64,8 @@ func TestCodec(t *testing.T) {
 	assert.NotNil(t, val)
 	assert.Equal(t, []byte("value2"), val)
 
-	serverCodec := codec.GetServer("trpc")
-	clientCodec := codec.GetClient("trpc")
+	serverCodec, _ := codec.GetServer("trpc")
+	clientCodec, _ := codec.GetClient("trpc")
 	frameBuilder := transport.GetFramerBuilder("trpc")
 
 	assert.Equal(t, trpc.DefaultServerCodec, serverCodec)

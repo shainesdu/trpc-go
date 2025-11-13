@@ -34,7 +34,9 @@ import (
 )
 
 func init() {
-	codec.Register(ProtocolName, DefaultServerCodec, DefaultClientCodec)
+	if err := codec.Register(ProtocolName, DefaultServerCodec, DefaultClientCodec); err != nil {
+		panic(fmt.Sprintf("failed to register trpc codec: %v", err))
+	}
 	transport.RegisterFramerBuilder(ProtocolName, DefaultFramerBuilder)
 }
 

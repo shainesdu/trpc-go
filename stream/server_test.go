@@ -131,7 +131,7 @@ func TestStreamDispatcherHandleInit(t *testing.T) {
 	opts := &server.Options{}
 	ft := &fakeServerTransport{}
 	opts.Transport = ft
-	opts.Codec = codec.GetServer("fake")
+	opts.Codec, _ = codec.GetServer("fake")
 	err := dispatcher.Init(opts)
 	assert.Nil(t, err)
 	assert.Equal(t, opts.Transport, opts.StreamTransport)
@@ -195,7 +195,7 @@ func TestStreamDispatcherHandleData(t *testing.T) {
 	opts := &server.Options{}
 	ft := &fakeServerTransport{}
 	opts.Transport = ft
-	opts.Codec = codec.GetServer("fake")
+	opts.Codec, _ = codec.GetServer("fake")
 	err := dispatcher.Init(opts)
 	assert.Nil(t, err)
 	assert.Equal(t, opts.Transport, opts.StreamTransport)
@@ -253,7 +253,7 @@ func TestStreamDispatcherHandleClose(t *testing.T) {
 	opts := &server.Options{}
 	ft := &fakeServerTransport{}
 	opts.Transport = ft
-	opts.Codec = codec.GetServer("fake")
+	opts.Codec, _ = codec.GetServer("fake")
 	err := dispatcher.Init(opts)
 	assert.Nil(t, err)
 	assert.Equal(t, opts.Transport, opts.StreamTransport)
@@ -323,7 +323,7 @@ func TestServerStreamSendMsg(t *testing.T) {
 	opts := &server.Options{}
 	ft := &fakeServerTransport{}
 	opts.Transport = ft
-	opts.Codec = codec.GetServer("fake")
+	opts.Codec, _ = codec.GetServer("fake")
 	err := dispatcher.Init(opts)
 	assert.Nil(t, err)
 	assert.Equal(t, opts.Transport, opts.StreamTransport)
@@ -402,7 +402,7 @@ func TestServerStreamRecvMsg(t *testing.T) {
 	opts := &server.Options{}
 	ft := &fakeServerTransport{}
 	opts.Transport = ft
-	opts.Codec = codec.GetServer("fake")
+	opts.Codec, _ = codec.GetServer("fake")
 	err := dispatcher.Init(opts)
 	assert.Nil(t, err)
 	assert.Equal(t, opts.Transport, opts.StreamTransport)
@@ -463,7 +463,7 @@ func TestServerStreamRecvMsgFail(t *testing.T) {
 	opts := &server.Options{}
 	ft := &fakeServerTransport{}
 	opts.Transport = ft
-	opts.Codec = codec.GetServer("fake")
+	opts.Codec, _ = codec.GetServer("fake")
 	err := dispatcher.Init(opts)
 	assert.Nil(t, err)
 	assert.Equal(t, opts.Transport, opts.StreamTransport)
@@ -517,7 +517,7 @@ func TestHandleError(t *testing.T) {
 	opts := &server.Options{}
 	ft := &fakeServerTransport{}
 	opts.Transport = ft
-	opts.Codec = codec.GetServer("fake")
+	opts.Codec, _ = codec.GetServer("fake")
 	err := dispatcher.Init(opts)
 	assert.Nil(t, err)
 	assert.Equal(t, opts.Transport, opts.StreamTransport)
@@ -575,7 +575,7 @@ func TestStreamDispatcherHandleFeedback(t *testing.T) {
 	opts := &server.Options{}
 	ft := &fakeServerTransport{}
 	opts.Transport = ft
-	opts.Codec = codec.GetServer("fake")
+	opts.Codec, _ = codec.GetServer("fake")
 	err := dispatcher.Init(opts)
 	assert.Nil(t, err)
 	assert.Equal(t, opts.Transport, opts.StreamTransport)
@@ -637,7 +637,7 @@ func TestServerFlowControl(t *testing.T) {
 	opts := &server.Options{}
 	ft := &fakeServerTransport{}
 	opts.Transport = ft
-	opts.Codec = codec.GetServer("fake")
+	opts.Codec, _ = codec.GetServer("fake")
 	err := dispatcher.Init(opts)
 	assert.Nil(t, err)
 	assert.Equal(t, opts.Transport, opts.StreamTransport)
