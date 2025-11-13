@@ -17,6 +17,11 @@
 // that do not rely on configuration should be registered by calling methods in certain packages.
 package plugin
 
+import (
+	"errors"
+	"fmt"
+)
+
 var plugins = make(map[string]map[string]Factory) // plugin type => { plugin name => plugin factory }
 
 // Factory is the interface for plugin factory abstraction.
@@ -47,7 +52,57 @@ func Register(name string, f Factory) {
 	factories[name] = f
 }
 
+// RegisterWithValidation registers a plugin factory with validation.
+func RegisterWithValidation(name string, f Factory) error {
+	if name == "" {
+		return errors.New("plugin name cannot be empty")
+	}
+	if f == nil {
+		return errors.New("plugin factory cannot be nil")
+	}
+	
+	pluginType := f.Type()
+	if pluginType == "" {
+		return errors.New("plugin type cannot be empty")
+	}
+	
+	factories, ok := plugins[pluginType]
+	if !ok {
+		factories = make(map[string]Factory)
+		plugins[pluginType] = factories
+	}
+	
+	if _, exists := factories[name]; exists {
+		return fmt.Errorf("plugin %q of type %q is already registered", name, pluginType)
+	}
+	
+	factories[name] = f
+	return nil
+}
+
 // Get returns a plugin Factory by its type and name.
 func Get(typ string, name string) Factory {
 	return plugins[typ][name]
+}
+
+// GetWithError returns a plugin Factory by its type and name.
+func GetWithError(typ string, name string) (Factory, error) {
+	if typ == "" {
+		return nil, errors.New("plugin type cannot be empty")
+	}
+	if name == "" {
+		return nil, errors.New("plugin name cannot be empty")
+	}
+	
+	factories, ok := plugins[typ]
+	if !ok {
+		return nil, fmt.Errorf("no plugins registered for type %q", typ)
+	}
+	
+	factory, ok := factories[name]
+	if !ok {
+		return nil, fmt.Errorf("plugin %q of type %q not found", name, typ)
+	}
+	
+	return factory, nil
 }

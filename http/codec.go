@@ -128,11 +128,18 @@ func RegisterStatus[T errs.ErrCode](code T, httpStatus int) {
 }
 
 func init() {
-	codec.Register("http", DefaultServerCodec, DefaultClientCodec)
-	codec.Register("http2", DefaultServerCodec, DefaultClientCodec)
-	// Support no protocol file custom routing and feature isolation.
-	codec.Register("http_no_protocol", DefaultNoProtocolServerCodec, DefaultClientCodec)
-	codec.Register("http2_no_protocol", DefaultNoProtocolServerCodec, DefaultClientCodec)
+	if err := codec.Register("http", DefaultServerCodec, DefaultClientCodec); err != nil {
+		panic(fmt.Sprintf("failed to register http codec: %v", err))
+	}
+	if err := codec.Register("http2", DefaultServerCodec, DefaultClientCodec); err != nil {
+		panic(fmt.Sprintf("failed to register http2 codec: %v", err))
+	}
+	if err := codec.Register("http_no_protocol", DefaultNoProtocolServerCodec, DefaultClientCodec); err != nil {
+		panic(fmt.Sprintf("failed to register http_no_protocol codec: %v", err))
+	}
+	if err := codec.Register("http2_no_protocol", DefaultNoProtocolServerCodec, DefaultClientCodec); err != nil {
+		panic(fmt.Sprintf("failed to register http2_no_protocol codec: %v", err))
+	}
 }
 
 var (

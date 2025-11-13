@@ -35,8 +35,8 @@ func TestStreamCodecInit(t *testing.T) {
 
 	ctx := trpc.BackgroundContext()
 	assert.NotNil(t, ctx)
-	serverCodec := codec.GetServer("trpc")
-	clientCodec := codec.GetClient("trpc")
+	serverCodec, _ := codec.GetServer("trpc")
+	clientCodec, _ := codec.GetClient("trpc")
 
 	// Client encode
 	frameHead := &trpc.FrameHead{
@@ -133,8 +133,8 @@ func TestStreamCodecData(t *testing.T) {
 	ctx := trpc.BackgroundContext()
 	assert.NotNil(t, ctx)
 
-	serverCodec := codec.GetServer("trpc")
-	clientCodec := codec.GetClient("trpc")
+	serverCodec, _ := codec.GetServer("trpc")
+	clientCodec, _ := codec.GetClient("trpc")
 
 	// init first, ensuring that init frame is saved
 	initResult := []byte{0x9, 0x30, 0x1, 0x1, 0x0, 0x0, 0x0, 0x59, 0x0, 0x0, 0x0, 0x0, 0x0, 0x64, 0x0, 0x0, 0xa,
@@ -228,8 +228,8 @@ func TestStreamCodecClose(t *testing.T) {
 
 	ctx := trpc.BackgroundContext()
 	assert.NotNil(t, ctx)
-	serverCodec := codec.GetServer("trpc")
-	clientCodec := codec.GetClient("trpc")
+	serverCodec, _ := codec.GetServer("trpc")
+	clientCodec, _ := codec.GetClient("trpc")
 
 	// init first, ensuring that init frame is saved
 	initResult := []byte{0x9, 0x30, 0x1, 0x1, 0x0, 0x0, 0x0, 0x59, 0x0, 0x0, 0x0, 0x0, 0x0, 0x64, 0x0, 0x0, 0xa,
@@ -336,8 +336,8 @@ func TestStreamCodecReset(t *testing.T) {
 
 	ctx := trpc.BackgroundContext()
 	assert.NotNil(t, ctx)
-	serverCodec := codec.GetServer("trpc")
-	clientCodec := codec.GetClient("trpc")
+	serverCodec, _ := codec.GetServer("trpc")
+	clientCodec, _ := codec.GetClient("trpc")
 
 	// Client encode Reset
 	frameHead := &trpc.FrameHead{
@@ -418,8 +418,8 @@ func TestUnknownFrameType(t *testing.T) {
 	assert.NotNil(t, msg)
 	ctx := trpc.BackgroundContext()
 	assert.NotNil(t, ctx)
-	clientCodec := codec.GetClient("trpc")
-	serverCodec := codec.GetServer("trpc")
+	clientCodec, _ := codec.GetClient("trpc")
+	serverCodec, _ := codec.GetServer("trpc")
 
 	serverEncodeData := []byte{0x9, 0x30, 0x1, 0x7, 0x0, 0x0, 0x0, 0x2d, 0x0, 0x0, 0x0, 0x0,
 		0x0, 0x64, 0x0, 0x0, 0x12, 0x1b, 0x8, 0x2,
@@ -477,8 +477,8 @@ func TestFeedbackFrameType(t *testing.T) {
 	assert.NotNil(t, msg)
 	ctx := trpc.BackgroundContext()
 	assert.NotNil(t, ctx)
-	clientCodec := codec.GetClient("trpc")
-	serverCodec := codec.GetServer("trpc")
+	clientCodec, _ := codec.GetClient("trpc")
+	serverCodec, _ := codec.GetServer("trpc")
 
 	// init first, ensuring that init frame is saved
 	initResult := []byte{0x9, 0x30, 0x1, 0x1, 0x0, 0x0, 0x0, 0x59, 0x0, 0x0, 0x0, 0x0, 0x0, 0x64, 0x0, 0x0, 0xa,
@@ -566,8 +566,8 @@ func TestFeedbackFrameType(t *testing.T) {
 func TestDecodeEncodeFail(t *testing.T) {
 	ctx := trpc.BackgroundContext()
 	assert.NotNil(t, ctx)
-	clientCodec := codec.GetClient("trpc")
-	serverCodec := codec.GetServer("trpc")
+	clientCodec, _ := codec.GetClient("trpc")
+	serverCodec, _ := codec.GetServer("trpc")
 
 	// init first, ensuring that init frame is saved
 	initResult := []byte{0x9, 0x30, 0x1, 0x1, 0x0, 0x0, 0x0, 0x59, 0x0, 0x0, 0x0, 0x0, 0x0, 0x64, 0x0, 0x0, 0xa,
@@ -637,8 +637,8 @@ func TestEncodeWithMetadata(t *testing.T) {
 	assert.NotNil(t, msg)
 	ctx := trpc.BackgroundContext()
 	assert.NotNil(t, ctx)
-	serverCodec := codec.GetServer("trpc")
-	clientCodec := codec.GetClient("trpc")
+	serverCodec, _ := codec.GetServer("trpc")
+	clientCodec, _ := codec.GetClient("trpc")
 	// Client encode
 	frameHead := &trpc.FrameHead{
 		FrameType:       uint8(trpcpb.TrpcDataFrameType_TRPC_STREAM_FRAME),
@@ -680,8 +680,8 @@ func TestEncodeWithDyeing(t *testing.T) {
 	assert.NotNil(t, msg)
 	ctx := trpc.BackgroundContext()
 	assert.NotNil(t, ctx)
-	serverCodec := codec.GetServer("trpc")
-	clientCodec := codec.GetClient("trpc")
+	serverCodec, _ := codec.GetServer("trpc")
+	clientCodec, _ := codec.GetClient("trpc")
 	// Client encode
 	frameHead := &trpc.FrameHead{
 		FrameType:       uint8(trpcpb.TrpcDataFrameType_TRPC_STREAM_FRAME),
@@ -725,8 +725,8 @@ func TestEncodeWithEnvTransfer(t *testing.T) {
 	assert.NotNil(t, msg)
 	ctx := trpc.BackgroundContext()
 	assert.NotNil(t, ctx)
-	serverCodec := codec.GetServer("trpc")
-	clientCodec := codec.GetClient("trpc")
+	serverCodec, _ := codec.GetServer("trpc")
+	clientCodec, _ := codec.GetClient("trpc")
 	// Client encode
 	frameHead := &trpc.FrameHead{
 		FrameType:       uint8(trpcpb.TrpcDataFrameType_TRPC_STREAM_FRAME),

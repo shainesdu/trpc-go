@@ -16,6 +16,8 @@
 package codec
 
 import (
+	"errors"
+	"fmt"
 	"sync"
 
 	trpcpb "trpc.group/trpc/trpc-protocol/pb/go/trpc"
@@ -57,25 +59,58 @@ var (
 // Register defines the logic of register a codec by name. It will be
 // called by init function defined by third package. If there is no server codec,
 // the second param serverCodec can be nil.
-func Register(name string, serverCodec Codec, clientCodec Codec) {
+func Register(name string, serverCodec Codec, clientCodec Codec) error {
+	if name == "" {
+		return errors.New("codec name cannot be empty")
+	}
+	
 	lock.Lock()
+	defer lock.Unlock()
+	
+	if _, exists := serverCodecs[name]; exists {
+		return fmt.Errorf("codec %q is already registered", name)
+	}
+	
 	serverCodecs[name] = serverCodec
 	clientCodecs[name] = clientCodec
-	lock.Unlock()
+	return nil
+}
+
+// RegisterWithValidation registers a codec by name with validation.
+func RegisterWithValidation(name string, serverCodec Codec, clientCodec Codec) error {
+	return Register(name, serverCodec, clientCodec)
 }
 
 // GetServer returns the server codec by name.
-func GetServer(name string) Codec {
+func GetServer(name string) (Codec, error) {
 	lock.RLock()
-	c := serverCodecs[name]
+	c, exists := serverCodecs[name]
 	lock.RUnlock()
-	return c
+	
+	if !exists {
+		return nil, fmt.Errorf("server codec %q not found", name)
+	}
+	return c, nil
+}
+
+// GetServerWithError returns the server codec by name with explicit error handling.
+func GetServerWithError(name string) (Codec, error) {
+	return GetServer(name)
 }
 
 // GetClient returns the client codec by name.
-func GetClient(name string) Codec {
+func GetClient(name string) (Codec, error) {
 	lock.RLock()
-	c := clientCodecs[name]
+	c, exists := clientCodecs[name]
 	lock.RUnlock()
-	return c
+	
+	if !exists {
+		return nil, fmt.Errorf("client codec %q not found", name)
+	}
+	return c, nil
+}
+
+// GetClientWithError returns the client codec by name with explicit error handling.
+func GetClientWithError(name string) (Codec, error) {
+	return GetClient(name)
 }
